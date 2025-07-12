@@ -1,0 +1,39 @@
+{
+  "FoundationFoods": [
+    {
+      "fdcId": 123456,
+      "description": "Test Food 1",
+      "foodPortions": [
+        {
+          "id": 1,
+          "value": 1.0,
+          "measureUnit": {
+            "id": 1000,
+            "name": "cup",
+            "abbreviation": "cup"
+          },
+          "modifier": "sliced",
+          "gramWeight": 100.0,
+          "sequenceNumber": 1,
+          "amount": 1.0,
+          "minYearAcquired": 2020
+        }
+      ],
+      "nutrientConversionFactors": [
+        {
+          "type": ".CalorieConversionFactor",
+          "proteinValue": 3.0,
+          "fatValue": 8.0,
+          "carbohydrateValue": 4.0,
+          "value": 15.0
+        }
+      ]
+    },
+    {
+      "fdcId": 789012,
+      "description": "Test Food 2",
+      "foodPortions": [],
+      "nutrientConversionFactors": []
+    }
+  ]
+} 

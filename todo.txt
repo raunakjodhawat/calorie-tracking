@@ -1,0 +1,27 @@
+- food-data-loader with 100% test coverage
+    - repetability of running unit tests
+    - Ability to run tests on docker 
+
+- calorie-backend
+    - Scala + ZIO backend app
+    - Sign up user with secret question and answer, email, password (generate salt on the server and save the hashed password)
+    - Login
+    - Forget password with secret matching
+    - Once logged in
+    - web socket to get all food names, and appropriate unit information
+    - See a Individual's record by date, default to today
+    - Ability to see individual's record from day of joining until today one day at a time
+    - Ability to consolidate records and show protein, fat, calories per day and carbs for the date selected
+    - Ability to create custom meals, which include a combination of food item each with different category.
+    - Ability to add, update and delete any of the food for any of the active dates (date of joining until today)
+    - Take calorie, fat, protein, carb goal and from the user and save it
+
+- calorie-frontend
+    - react and next.js based frontend application, with the ability to sign up, login and forget password functionality.
+    - create a catchy home page
+    - once logged in, store the token information on the session storage, such that with each request server can verify the authenticity of incoming request.
+    - user should get the option to choose a goal then there should be option to edit the goal
+    - Use should have a search box, a date slector to select what date need a food entry
+    - search box sends a websocket query to get all the food names, once selected give user the option to select appropriate quantity and log the food.
+    - on the top, display how much of the goal is achieved for the day.
+    - give the option to logout. clear session on logout.
