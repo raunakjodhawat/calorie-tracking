@@ -16,8 +16,5 @@ WORKDIR /app
 # Copy the project
 COPY . /app
 
-# Download dependencies and compile
-RUN sbt compile
-
-# Default command: run the app
-CMD ["sbt", "run"] 
+# Download the app
+RUN sbt run

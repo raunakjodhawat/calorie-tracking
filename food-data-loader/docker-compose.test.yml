@@ -24,4 +24,4 @@ services:
       DB_DATABASE: food_db
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
-    command: ["sbt", "clean", "coverage", "test", "coverageReport"] 
+    command: ["sbt", "clean", "test"] 
