@@ -23,10 +23,10 @@ jobs:
         image: postgres:14
         env:
           POSTGRES_DB: food_db
-          POSTGRES_USER: food_user
-          POSTGRES_PASSWORD: food_pass
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         options: >-
-          --health-cmd pg_isready
+          --health-cmd pg_isready -h localhost -p 5432 -U postgres -d food_db
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -68,7 +68,7 @@ jobs:
 
       - name: Wait for PostgreSQL
         run: |
-          while ! pg_isready -h localhost -p 5432 -U food_user -d food_db; do
+          while ! pg_isready -h localhost -p 5432 -U postgres -d food_db; do
             echo "Waiting for PostgreSQL..."
             sleep 2
           done
@@ -79,8 +79,8 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5432
           DB_DATABASE: food_db
-          DB_USERNAME: food_user
-          DB_PASSWORD: food_pass
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
