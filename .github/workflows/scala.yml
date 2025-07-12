@@ -29,6 +29,3 @@ jobs:
         cache: 'sbt'
     - name: Run Tests
       run: cd food-data-loader && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
-      # Optional: This step uploads information to the GitHub dependency graph and unblocking Dependabot alerts for the repository
-    - name: Upload dependency graph
-      uses: scalacenter/sbt-dependency-submission@ab086b50c947c9774b70f39fc7f6e20ca2706c91
