@@ -45,7 +45,7 @@ jobs:
       - name: Set up sbt
         uses: olafurpg/setup-scala@v14
         with:
-          sbt-version: 1.10.2
+          java-version: 11
 
       - name: Cache SBT
         uses: actions/cache@v4
