@@ -11,28 +11,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
       - name: Build and start services
-        run: docker-compose up -d postgres
-        
-      - name: Wait for PostgreSQL
+        run: docker-compose up -d --build
+      - name: Wait for app to finish
         run: |
-          # Wait for PostgreSQL to be ready
-          timeout 60 bash -c 'until docker-compose exec -T postgres pg_isready -U food_user; do sleep 2; done'
-          
-      - name: Run tests
-        run: docker-compose run --rm test
-        
-      - name: Run coverage
-        run: docker-compose run --rm test sbt coverage test coverageReport
-        
+          docker-compose logs -f food-data-loader &
+          sleep 60 # Wait for the app to finish loading data
+      - name: Run tests in container
+        run: docker-compose run --rm food-data-loader sbt test
+      - name: Run coverage in container
+        run: docker-compose run --rm food-data-loader sbt coverage test coverageReport
       - name: Copy coverage report
         run: |
-          # Get the container ID from the last test run
-          CONTAINER_ID=$(docker ps -q --filter "ancestor=food-data-loader_test" --filter "status=exited" | head -1)
-          # Copy the coverage report
-          docker cp $CONTAINER_ID:/app/target/scala-2.13/scoverage-report/scoverage.xml ./scoverage.xml
-          
+          docker cp $(docker-compose ps -q food-data-loader):/app/target/scala-2.13/scoverage-report/scoverage.xml ./scoverage.xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -41,7 +32,6 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: true
           verbose: true
-          
       - name: Cleanup
         if: always()
         run: docker-compose down -v 
