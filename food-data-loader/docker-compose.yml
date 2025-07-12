@@ -13,6 +13,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      
   food-data-loader:
     build: .
     depends_on:
@@ -24,4 +25,19 @@ services:
       DB_DATABASE: food_db
       DB_USERNAME: food_user
       DB_PASSWORD: food_pass
-    command: ["sbt", "run"] 
+    command: ["sbt", "run"]
+    
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: food_db
+      DB_USERNAME: food_user
+      DB_PASSWORD: food_pass
+    command: ["sbt", "test"] 
