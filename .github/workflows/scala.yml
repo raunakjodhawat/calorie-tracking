@@ -60,6 +60,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-sbt-cache-v2-
 
+      - name: Verify Java version
+        run: java -version
+
       - name: Wait for PostgreSQL
         run: |
           while ! pg_isready -h localhost -p 5432 -U food_user -d food_db; do
@@ -79,7 +82,7 @@ jobs:
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./target/scala-2.13/scoverage-report/scoverage.xml
+          file: ./food-data-loader/target/scala-2.13/scoverage-report/scoverage.xml
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: true
