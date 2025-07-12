@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   postgres:
     image: postgres:14
@@ -12,7 +13,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-  food-data-loader:
+  food-data-loader-test:
     build: .
     depends_on:
       postgres:
@@ -23,4 +24,4 @@ services:
       DB_DATABASE: food_db
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
-    command: ["sbt", "run"] 
+    command: ["sbt", "clean", "coverage", "test", "coverageReport"] 

@@ -7,86 +7,30 @@ name: Scala CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
 
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_DB: food_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        options: >-
-          --health-cmd pg_isready -h localhost -p 5432 -U postgres -d food_db
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-
-      - name: Set up sbt
-        uses: olafurpg/setup-scala@v14
-        with:
-          java-version: 11
-
-      - name: Cache SBT
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache/v1
-            ~/.cache/coursier/v1
-            ~/AppData/Local/Coursier/Cache/v1
-          key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt', '**/project/build.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-sbt-cache-v2-
-
-      - name: Verify Java version
-        run: java -version
-
-      - name: Verify SBT Java version
-        run: cd food-data-loader && sbt "show javaHome"
-
-      - name: Wait for PostgreSQL
-        run: |
-          while ! pg_isready -h localhost -p 5432 -U postgres -d food_db; do
-            echo "Waiting for PostgreSQL..."
-            sleep 2
-          done
-
-      - name: Run tests
-        run: cd food-data-loader && sbt run && sbt clean coverage test coverageReport
-        env:
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_DATABASE: food_db
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./food-data-loader/target/scala-2.13/scoverage-report/scoverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: true
-          verbose: true
+    - uses: actions/checkout@v4
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: 'sbt'
+    - name: Run Application
+      run: cd food-data-loader && docker compose -f docker-compose.yml up --build --abort-on-container-exit
+    - name: Run Tests
+      run: cd food-data-loader && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
+      # Optional: This step uploads information to the GitHub dependency graph and unblocking Dependabot alerts for the repository
+    - name: Upload dependency graph
+      uses: scalacenter/sbt-dependency-submission@ab086b50c947c9774b70f39fc7f6e20ca2706c91
