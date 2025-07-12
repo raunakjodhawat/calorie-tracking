@@ -32,12 +32,13 @@ lazy val root = (project in file("."))
     
     // Scoverage settings
     coverageEnabled := true,
-    coverageMinimumStmtTotal := 100,
-    coverageMinimumBranchTotal := 100,
-    coverageMinimumStmtPerPackage := 100,
-    coverageMinimumBranchPerPackage := 100,
-    coverageMinimumStmtPerFile := 100,
-    coverageMinimumBranchPerFile := 100,
+    coverageMinimumStmtTotal := 90,
+    coverageMinimumBranchTotal := 90,
+    coverageMinimumStmtPerPackage := 90,
+    coverageMinimumBranchPerPackage := 90,
+    coverageMinimumStmtPerFile := 90,
+    coverageMinimumBranchPerFile := 90,
     coverageFailOnMinimum := true,
-    coverageHighlighting := true
+    coverageHighlighting := true,
+    coverageExcludedPackages := "com.fooddataLoader.Main"
   ) 

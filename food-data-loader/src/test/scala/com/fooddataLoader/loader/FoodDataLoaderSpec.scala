@@ -1,8 +1,8 @@
-package com.foodbackend.loader
+package com.fooddataLoader.loader
 
-import com.foodbackend.domain._
-import com.foodbackend.config.AppConfig
-import com.foodbackend.repository.FoodRepository
+import com.fooddataLoader.domain._
+import com.fooddataLoader.config.AppConfig
+import com.fooddataLoader.repository.FoodRepository
 import zio._
 import zio.test._
 import zio.test.Assertion._
@@ -160,30 +160,8 @@ object FoodDataLoaderSpec extends ZIOSpecDefault {
       }
     )
   ).provide(
-    // Mock configuration for testing
-    ZLayer.succeed(AppConfig(
-      database = com.foodbackend.config.DatabaseConfig(
-        host = "localhost",
-        port = 5432,
-        database = "test_db",
-        username = "test_user",
-        password = "test_pass"
-      ),
-      foodDataPath = "test-food-data.json"
-    )),
-    // Mock repository that does nothing
-    ZLayer.succeed(new MockFoodRepository),
-    FoodDataLoader.live,
-    Scope.default
+    // No layers needed for JSON parsing tests
   )
 
-  class MockFoodRepository extends FoodRepository {
-    def insertFood(food: Food): ZIO[Scope, Throwable, Unit] = ZIO.unit
-    def insertFoodPortions(fdcId: Long, portions: List[FoodPortion]): ZIO[Scope, Throwable, Unit] = ZIO.unit
-    def insertNutrientConversionFactors(fdcId: Long, factors: List[NutrientConversionFactor]): ZIO[Scope, Throwable, Unit] = ZIO.unit
-    def getAllFoods: ZIO[Scope, Throwable, List[com.foodbackend.repository.FoodEntity]] = ZIO.succeed(List.empty)
-    def getFoodByFdcId(fdcId: Long): ZIO[Scope, Throwable, Option[com.foodbackend.repository.FoodEntity]] = ZIO.succeed(None)
-    def getFoodPortions(fdcId: Long): ZIO[Scope, Throwable, List[com.foodbackend.repository.FoodPortionEntity]] = ZIO.succeed(List.empty)
-    def getNutrientConversionFactors(fdcId: Long): ZIO[Scope, Throwable, List[com.foodbackend.repository.NutrientConversionFactorEntity]] = ZIO.succeed(List.empty)
-  }
+  // MockFoodRepository class removed as it's no longer needed
 } 

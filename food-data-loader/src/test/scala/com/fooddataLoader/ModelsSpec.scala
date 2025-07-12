@@ -1,6 +1,6 @@
-package com.foodbackend
+package com.fooddataLoader
 
-import com.foodbackend.domain._
+import com.fooddataLoader.domain._
 import zio.test._
 import zio.json._
 

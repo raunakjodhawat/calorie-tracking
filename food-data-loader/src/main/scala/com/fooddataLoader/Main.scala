@@ -1,8 +1,8 @@
-package com.foodbackend
+package com.fooddataLoader
 
-import com.foodbackend.config.AppConfig
-import com.foodbackend.loader.FoodDataLoader
-import com.foodbackend.repository.{DatabaseSetup, FoodRepository}
+import com.fooddataLoader.config.AppConfig
+import com.fooddataLoader.loader.FoodDataLoader
+import com.fooddataLoader.repository.{DatabaseSetup, FoodRepository}
 import zio._
 import zio.logging._
 import java.sql.Connection

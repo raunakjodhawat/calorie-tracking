@@ -1,7 +1,7 @@
-package com.foodbackend.repository
+package com.fooddataLoader.repository
 
-import com.foodbackend.domain._
-import com.foodbackend.ConnectionService
+import com.fooddataLoader.domain._
+import com.fooddataLoader.ConnectionService
 import zio._
 import java.sql.{Connection, PreparedStatement, ResultSet, Timestamp}
 import java.time.LocalDateTime
@@ -71,7 +71,7 @@ class FoodRepositoryLive(connectionService: ConnectionService) extends FoodRepos
     if (portions.isEmpty) ZIO.unit
     else {
       val sql = """
-        INSERT INTO food_portions (id, food_fdc_id, value, measure_unit_id, measure_unit_name,
+        INSERT INTO food_portions (id, food_fdc_id, "value", measure_unit_id, measure_unit_name,
                                  measure_unit_abbreviation, modifier, gram_weight, sequence_number,
                                  amount, min_year_acquired)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -88,7 +88,10 @@ class FoodRepositoryLive(connectionService: ConnectionService) extends FoodRepos
               stmt.setLong(4, portion.measureUnit.id)
               stmt.setString(5, portion.measureUnit.name)
               stmt.setString(6, portion.measureUnit.abbreviation)
-              stmt.setString(7, portion.modifier.getOrElse(""))
+              portion.modifier match {
+                case Some(mod) => stmt.setString(7, mod)
+                case None      => stmt.setNull(7, java.sql.Types.VARCHAR)
+              }
               stmt.setDouble(8, portion.gramWeight)
               stmt.setInt(9, portion.sequenceNumber)
               stmt.setDouble(10, portion.amount)
@@ -110,7 +113,7 @@ class FoodRepositoryLive(connectionService: ConnectionService) extends FoodRepos
     else {
       val sql = """
         INSERT INTO nutrient_conversion_factors (food_fdc_id, type, protein_value, fat_value, 
-                                               carbohydrate_value, value)
+                                               carbohydrate_value, "value")
         VALUES (?, ?, ?, ?, ?, ?)
       """
       
@@ -207,11 +210,17 @@ class FoodRepositoryLive(connectionService: ConnectionService) extends FoodRepos
               measureUnitId = rs.getLong("measure_unit_id"),
               measureUnitName = rs.getString("measure_unit_name"),
               measureUnitAbbreviation = rs.getString("measure_unit_abbreviation"),
-              modifier = Option(rs.getString("modifier")),
+              modifier = {
+                val value = rs.getString("modifier")
+                if (rs.wasNull()) None else Some(value)
+              },
               gramWeight = rs.getDouble("gram_weight"),
               sequenceNumber = rs.getInt("sequence_number"),
               amount = rs.getDouble("amount"),
-              minYearAcquired = Option(rs.getInt("min_year_acquired"))
+              minYearAcquired = {
+                val value = rs.getInt("min_year_acquired")
+                if (rs.wasNull()) None else Some(value)
+              }
             )
           }
           portions.toList
@@ -235,10 +244,22 @@ class FoodRepositoryLive(connectionService: ConnectionService) extends FoodRepos
               id = rs.getLong("id"),
               foodFdcId = rs.getLong("food_fdc_id"),
               `type` = rs.getString("type"),
-              proteinValue = Option(rs.getDouble("protein_value")),
-              fatValue = Option(rs.getDouble("fat_value")),
-              carbohydrateValue = Option(rs.getDouble("carbohydrate_value")),
-              value = Option(rs.getDouble("value"))
+              proteinValue = {
+                val value = rs.getDouble("protein_value")
+                if (rs.wasNull()) None else Some(value)
+              },
+              fatValue = {
+                val value = rs.getDouble("fat_value")
+                if (rs.wasNull()) None else Some(value)
+              },
+              carbohydrateValue = {
+                val value = rs.getDouble("carbohydrate_value")
+                if (rs.wasNull()) None else Some(value)
+              },
+              value = {
+                val value = rs.getDouble("value")
+                if (rs.wasNull()) None else Some(value)
+              }
             )
           }
           factors.toList

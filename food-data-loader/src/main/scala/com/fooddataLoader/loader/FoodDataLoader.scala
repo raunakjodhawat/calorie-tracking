@@ -1,8 +1,8 @@
-package com.foodbackend.loader
+package com.fooddataLoader.loader
 
-import com.foodbackend.config.AppConfig
-import com.foodbackend.domain._
-import com.foodbackend.repository.FoodRepository
+import com.fooddataLoader.config.AppConfig
+import com.fooddataLoader.domain._
+import com.fooddataLoader.repository.FoodRepository
 import zio._
 import zio.json._
 import zio.stream._

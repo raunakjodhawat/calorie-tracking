@@ -1,6 +1,6 @@
-package com.foodbackend.repository
+package com.fooddataLoader.repository
 
-import com.foodbackend.domain._
+import com.fooddataLoader.domain._
 import zio._
 import zio.test._
 import zio.test.Assertion._
@@ -180,7 +180,7 @@ object FoodRepositorySpec extends ZIOSpecDefault {
           factors <- FoodRepository.getNutrientConversionFactors(testFood.fdcId)
         } yield assertTrue(factors.isEmpty)
       }
-    )
+    ) @@ TestAspect.sequential
   ).provide(
     // Test database configuration
     testDataSourceLayer,
@@ -195,7 +195,7 @@ object FoodRepositorySpec extends ZIOSpecDefault {
       config.setJdbcUrl("jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE")
       config.setUsername("sa")
       config.setPassword("")
-      config.setMaximumPoolSize(5)
+      config.setMaximumPoolSize(20)
       config.setMinimumIdle(1)
       config.setConnectionTimeout(10000)
       config.setIdleTimeout(300000)
@@ -204,14 +204,14 @@ object FoodRepositorySpec extends ZIOSpecDefault {
     }
   }
 
-  private val testConnectionServiceLayer: ZLayer[DataSource, Nothing, com.foodbackend.ConnectionService] =
+  private val testConnectionServiceLayer: ZLayer[DataSource, Nothing, com.fooddataLoader.ConnectionService] =
     ZLayer {
       for {
         dataSource <- ZIO.service[DataSource]
       } yield new TestConnectionService(dataSource)
     }
 
-  class TestConnectionService(dataSource: DataSource) extends com.foodbackend.ConnectionService {
+  class TestConnectionService(dataSource: DataSource) extends com.fooddataLoader.ConnectionService {
     override def getConnection: ZIO[Scope, Throwable, Connection] = 
       ZIO.acquireRelease(
         ZIO.attemptBlocking(dataSource.getConnection)
