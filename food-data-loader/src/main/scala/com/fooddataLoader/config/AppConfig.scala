@@ -1,4 +1,4 @@
-package com.foodbackend.config
+package com.fooddataLoader.config
 
 import zio._
 import zio.config._

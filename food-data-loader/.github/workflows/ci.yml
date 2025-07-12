@@ -7,115 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  docker-test:
     runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_DB: food_test_db
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5433:5432
-
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: sbt
-    
-    - name: Cache SBT
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.sbt
-          ~/.ivy2/cache
-          ~/.coursier/cache/v1
-          ~/.cache/coursier/v1
-          ~/AppData/Local/Coursier/Cache/v1
-        key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt', '**/project/build.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-sbt-cache-v2-
-    
-    - name: Wait for PostgreSQL
-      run: |
-        while ! pg_isready -h localhost -p 5433 -U test_user -d food_test_db; do
-          echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
-    
-    - name: Run tests
-      run: sbt test
-      env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5433
-        POSTGRES_DB: food_test_db
-        POSTGRES_USER: test_user
-        POSTGRES_PASSWORD: test_password
-    
-    - name: Run tests with coverage
-      run: sbt coverage test coverageReport
-      env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5433
-        POSTGRES_DB: food_test_db
-        POSTGRES_USER: test_user
-        POSTGRES_PASSWORD: test_password
-    
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./target/scala-2.13/scoverage-report/scoverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
-        verbose: true
-
-  integration-test:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: sbt
-    
-    - name: Start PostgreSQL with Docker Compose
-      run: |
-        docker-compose up -d postgres-test
-        sleep 10
-    
-    - name: Wait for PostgreSQL
-      run: |
-        while ! pg_isready -h localhost -p 5433 -U test_user -d food_test_db; do
-          echo "Waiting for PostgreSQL..."
-          sleep 2
-        done
-    
-    - name: Run integration tests
-      run: sbt test
-      env:
-        POSTGRES_HOST: localhost
-        POSTGRES_PORT: 5433
-        POSTGRES_DB: food_test_db
-        POSTGRES_USER: test_user
-        POSTGRES_PASSWORD: test_password
-    
-    - name: Cleanup
-      if: always()
-      run: docker-compose down -v 
+      - uses: actions/checkout@v4
+      - name: Build and start services
+        run: docker-compose up -d --build
+      - name: Wait for app to finish
+        run: |
+          docker-compose logs -f food-data-loader &
+          sleep 60 # Wait for the app to finish loading data
+      - name: Run tests in container
+        run: docker-compose run --rm food-data-loader sbt test
+      - name: Run coverage in container
+        run: docker-compose run --rm food-data-loader sbt coverage test coverageReport
+      - name: Copy coverage report
+        run: |
+          docker cp $(docker-compose ps -q food-data-loader):/app/target/scala-2.13/scoverage-report/scoverage.xml ./scoverage.xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./scoverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
+      - name: Cleanup
+        if: always()
+        run: docker-compose down -v 

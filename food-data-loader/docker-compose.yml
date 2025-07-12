@@ -1,40 +1,27 @@
 version: '3.8'
-
 services:
-  postgres-test:
-    image: postgres:15
-    container_name: food-loader-test-db
+  postgres:
+    image: postgres:14
     environment:
-      POSTGRES_DB: food_test_db
-      POSTGRES_USER: test_user
-      POSTGRES_PASSWORD: test_password
+      POSTGRES_DB: food_db
+      POSTGRES_USER: food_user
+      POSTGRES_PASSWORD: food_pass
     ports:
-      - "5433:5432"
-    volumes:
-      - postgres_test_data:/var/lib/postgresql/data
+      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d food_test_db"]
-      interval: 5s
+      test: ["CMD", "pg_isready", "-U", "food_user"]
+      interval: 10s
       timeout: 5s
       retries: 5
-
-  postgres-dev:
-    image: postgres:15
-    container_name: food-loader-dev-db
+  food-data-loader:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      POSTGRES_DB: food_dev_db
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_dev_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dev_user -d food_dev_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_test_data:
-  postgres_dev_data: 
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: food_db
+      DB_USERNAME: food_user
+      DB_PASSWORD: food_pass
+    command: ["sbt", "run"] 

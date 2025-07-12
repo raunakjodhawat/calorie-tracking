@@ -1,4 +1,4 @@
-package com.foodbackend.config
+package com.fooddataLoader.config
 
 import zio._
 import zio.test._
@@ -49,6 +49,7 @@ object AppConfigSpec extends ZIOSpecDefault {
               username = "test_user"
               password = "test_pass"
             }
+            foodDataPath = "default-food-data.json"
           }
         """
 
@@ -62,7 +63,8 @@ object AppConfigSpec extends ZIOSpecDefault {
                assertTrue(appConfig.database.port == 5432) &&
                assertTrue(appConfig.database.database == "test_db") &&
                assertTrue(appConfig.database.username == "test_user") &&
-               assertTrue(appConfig.database.password == "test_pass")
+               assertTrue(appConfig.database.password == "test_pass") &&
+               assertTrue(appConfig.foodDataPath == "default-food-data.json")
       },
 
       test("should fail to load invalid configuration") {

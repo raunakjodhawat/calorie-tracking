@@ -1,4 +1,4 @@
-package com.foodbackend.domain
+package com.fooddataLoader.domain
 
 import zio.json._
 

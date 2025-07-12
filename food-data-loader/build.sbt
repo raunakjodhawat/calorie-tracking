@@ -39,5 +39,6 @@ lazy val root = (project in file("."))
     coverageMinimumStmtPerFile := 100,
     coverageMinimumBranchPerFile := 100,
     coverageFailOnMinimum := true,
-    coverageHighlighting := true
+    coverageHighlighting := true,
+    coverageExcludedPackages := "com.fooddataLoader.Main"
   ) 

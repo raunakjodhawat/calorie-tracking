@@ -1,8 +1,8 @@
-package com.foodbackend
+package com.fooddataLoader
 
-import com.foodbackend.config.AppConfig
-import com.foodbackend.loader.FoodDataLoader
-import com.foodbackend.repository.{DatabaseSetup, FoodRepository}
+import com.fooddataLoader.config.AppConfig
+import com.fooddataLoader.loader.FoodDataLoader
+import com.fooddataLoader.repository.{DatabaseSetup, FoodRepository}
 import zio._
 import zio.test._
 import zio.test.Assertion._
@@ -57,7 +57,7 @@ object IntegrationSpec extends ZIOSpecDefault {
           result <- FoodDataLoader.loadFoodDataFromFile("test-food-data.json").either
         } yield assertTrue(result.isRight) // Should succeed with proper setup
       }
-    )
+    ) @@ TestAspect.sequential
   ).provide(
     // Test database configuration
     testDataSourceLayer,
@@ -75,7 +75,7 @@ object IntegrationSpec extends ZIOSpecDefault {
       config.setJdbcUrl("jdbc:h2:mem:integration_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE")
       config.setUsername("sa")
       config.setPassword("")
-      config.setMaximumPoolSize(5)
+      config.setMaximumPoolSize(20)
       config.setMinimumIdle(1)
       config.setConnectionTimeout(10000)
       config.setIdleTimeout(300000)
@@ -84,7 +84,7 @@ object IntegrationSpec extends ZIOSpecDefault {
     }
   }
 
-  private val testConnectionServiceLayer: ZLayer[DataSource, Nothing, com.foodbackend.ConnectionService] =
+  private val testConnectionServiceLayer: ZLayer[DataSource, Nothing, com.fooddataLoader.ConnectionService] =
     ZLayer {
       for {
         dataSource <- ZIO.service[DataSource]
@@ -93,7 +93,7 @@ object IntegrationSpec extends ZIOSpecDefault {
 
   private val testConfigLayer: ZLayer[Any, Throwable, AppConfig] = ZLayer {
     ZIO.succeed(AppConfig(
-      database = com.foodbackend.config.DatabaseConfig(
+      database = com.fooddataLoader.config.DatabaseConfig(
         host = "localhost",
         port = 5432,
         database = "test_db",
@@ -104,7 +104,7 @@ object IntegrationSpec extends ZIOSpecDefault {
     ))
   }
 
-  class TestConnectionService(dataSource: DataSource) extends com.foodbackend.ConnectionService {
+  class TestConnectionService(dataSource: DataSource) extends com.fooddataLoader.ConnectionService {
     override def getConnection: ZIO[Scope, Throwable, java.sql.Connection] = 
       ZIO.acquireRelease(
         ZIO.attemptBlocking(dataSource.getConnection)
