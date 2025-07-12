@@ -68,7 +68,7 @@ jobs:
           done
 
       - name: Run tests
-        run: sbt clean coverage test coverageReport
+        run: cd food-data-loader && sbt clean coverage test coverageReport
         env:
           DB_HOST: localhost
           DB_PORT: 5432
